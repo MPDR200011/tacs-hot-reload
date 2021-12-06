@@ -2,7 +2,7 @@ import { src, dest, watch } from 'gulp';
 
 function buildHtml() {
     // place code for your default task here
-    src('src/*.html').pipe(dest('public'))
+    return src('src/*.html').pipe(dest('public'))
 }
 
 function defaultTask() {
