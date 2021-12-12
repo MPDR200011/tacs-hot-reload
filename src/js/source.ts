@@ -1,26 +1,51 @@
+import { Action, Engine, Result } from '../../lib/library'
+
+type State = {
+    value: number;
+}
+
+class Add extends Action<State> {
+
+    constructor(private amount: number) {
+        super();
+    }
+
+    __run() {
+        if (!this.state) {
+            return Result.INVALID_STATE;
+        }
+
+        this.state.value += this.amount;
+
+        return Result.SUCCESS;
+    }
+}
+
 (() => {
     let counterElement = document.getElementById('counter')
 
-    let buttonElement = document.getElementById('button')
+    const engine = new Engine<State>(
+        { value: 0 },
+        [
+            new Add(2),
+            new Add(2),
+            new Add(2),
+            new Add(2),
+            new Add(2),
+            new Add(2),
+            new Add(2),
+        ]
+    );
 
-    let counter = 0
-
-    function setCounterContents() {
-        if (!counterElement) {
-            console.log('Counter element is missing')
-            return
+    try {
+        while(true) {
+            engine.tick()
         }
-        counterElement.innerHTML = `${counter}`;
-    }
+    } catch( error ) { }
 
-    setCounterContents()
-
-    if (!buttonElement) {
-        console.log('Button element is missing')
-        return
+    if (counterElement) {
+        counterElement.innerHTML = `${ engine.getCurrentState().value }`
+    } else {
+        console.log(engine.getCurrentState().value)
     }
-    buttonElement.addEventListener('click', () => {
-        counter += 5;
-        setCounterContents()
-    })
 })();

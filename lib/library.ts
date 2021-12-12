@@ -1,8 +1,8 @@
-enum Result { SUCCESS, FAIL, RUN_AGAIN, IVALID_STATE };
+enum Result { SUCCESS, FAIL, RUN_AGAIN, INVALID_STATE };
 
 abstract class Action<T> {
 
-    state?: T;
+    public state?: T;
 
     constructor() { }
 
@@ -42,7 +42,7 @@ class Engine<T> {
                 throw new Error("Something went wrong.");
             }
 
-            if (result == Result.IVALID_STATE) {
+            if (result == Result.INVALID_STATE) {
                 throw new Error("Invalid state.");
             }
 
@@ -60,3 +60,5 @@ class Engine<T> {
         return this.currentState;
     }
 }
+
+export { Result, Action, Engine }
