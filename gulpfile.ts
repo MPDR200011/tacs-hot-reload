@@ -1,9 +1,10 @@
-import { src, dest, watch, series } from 'gulp'
-import * as ts from 'gulp-typescript'
+import * as gulp from 'gulp'
 import * as bs from 'browser-sync'
+import { default as webpack } from 'webpack-stream'
+import * as path from 'path'
 
-const tsProject = ts.createProject('tsconfig.json')
 const browserSync = bs.create()
+const { src, dest, watch, series } = gulp
 
 function buildHtml() {
     // place code for your default task here
@@ -11,7 +12,27 @@ function buildHtml() {
 }
 
 function buildTypescript() {
-    return src('src/**/*.ts').pipe(tsProject()).pipe(dest('public'))
+    return src('src/**/*.ts').pipe(webpack({ 
+        mode: 'development',
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    use: ['ts-loader'],
+                    include: [
+                        path.resolve(__dirname, 'src'),
+                        path.resolve(__dirname, 'lib'),
+                    ],
+                },
+            ],
+        },
+        output: {
+            filename: 'source.js'
+        },
+        resolve: {
+            extensions: ['.ts', '.js', '.json']
+        }
+    })).pipe(dest('public/js/'))
 }
 
 function dev() {

@@ -14,12 +14,15 @@
   "devDependencies": {
     "@types/browser-sync": "^2.26.3",
     "@types/gulp": "^4.0.9",
+    "@types/webpack-stream": "^3.2.12",
     "browser-sync": "^2.27.7",
     "gulp": "^4.0.2",
     "gulp-live-server": "^0.0.31",
     "gulp-typescript": "^6.0.0-alpha.1",
+    "ts-loader": "^9.2.6",
     "ts-node": "^10.4.0",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "webpack-stream": "^7.0.0"
   },
   "dependencies": {
     "http-server": "^14.0.0"
