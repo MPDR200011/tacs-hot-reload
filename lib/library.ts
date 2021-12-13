@@ -1,3 +1,5 @@
+import { cloneDeep } from 'lodash';
+
 enum Result { SUCCESS, FAIL, RUN_AGAIN, INVALID_STATE };
 
 abstract class Action<T> {
@@ -17,7 +19,7 @@ abstract class Action<T> {
         if (!this.state) {
             throw new Error("State is null.")
         }
-        return this.state;
+        return cloneDeep(this.state);
     }
 }
 
@@ -60,7 +62,7 @@ class Engine<T> {
     }
 
     getCurrentState() {
-        return this.currentState;
+        return cloneDeep(this.currentState);
     }
 
     rollback(idx: number = 0) {
@@ -74,7 +76,7 @@ class Engine<T> {
 
     commit() {
         this.currentActionIdx = 0;
-        this.initialState = this.currentState;
+        this.initialState = cloneDeep(this.currentState);
         this.actions = this.actions.splice(this.currentActionIdx);
     }
 }
