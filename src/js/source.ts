@@ -1,5 +1,11 @@
 import { Action, Engine, Result } from '../../lib/library'
 
+type GameState = {
+    board: Array<Array<number>>;
+    sankeHeadPos: [number, number];
+    snakeLength: number;
+}
+
 type State = {
     value: number;
 }
