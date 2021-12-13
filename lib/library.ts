@@ -22,6 +22,7 @@ abstract class Action<T> {
 }
 
 class Engine<T> {
+
     initialState: T;
     currentState: T;
     actions: Array<Action<T>>
@@ -34,30 +35,47 @@ class Engine<T> {
     }
 
     tick(state?: T) {
-        if (this.currentActionIdx < this.actions.length) {
-            const action = this.actions[this.currentActionIdx];
-            const result = action.run(state ?? this.currentState);
-
-            if (result == Result.FAIL) {
-                throw new Error("Something went wrong.");
-            }
-
-            if (result == Result.INVALID_STATE) {
-                throw new Error("Invalid state.");
-            }
-
-            this.currentState = action.resultingState();
-
-            if (result == Result.SUCCESS) {
-                this.currentActionIdx++;
-            }
-        } else {
-            throw new Error("No more actions")
+        if (this.currentActionIdx >= this.actions.length) {
+            return false;
         }
+
+        const action = this.actions[this.currentActionIdx];
+        const result = action.run(state ?? this.currentState);
+
+        if (result == Result.FAIL) {
+            throw new Error("Something went wrong.");
+        }
+
+        if (result == Result.INVALID_STATE) {
+            throw new Error("Invalid state.");
+        }
+
+        this.currentState = action.resultingState();
+
+        if (result == Result.SUCCESS) {
+            this.currentActionIdx++;
+        }
+
+        return true;
     }
 
     getCurrentState() {
         return this.currentState;
+    }
+
+    rollback(idx: number = 0) {
+        if (idx > this.actions.length) {
+            throw new Error("Index out of ranger")
+        }
+
+        this.currentActionIdx = idx;
+        this.currentState = this.actions[this.currentActionIdx].resultingState();
+    }
+
+    commit() {
+        this.currentActionIdx = 0;
+        this.initialState = this.currentState;
+        this.actions = this.actions.splice(this.currentActionIdx);
     }
 }
 
