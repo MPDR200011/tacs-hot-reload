@@ -42,7 +42,7 @@ class Engine<T> {
         }
 
         const action = this.actions[this.currentActionIdx];
-        const result = action.run(state ?? this.currentState);
+        const result = action.run(cloneDeep(state ?? this.currentState));
 
         if (result == Result.FAIL) {
             throw new Error("Something went wrong.");
