@@ -1,6 +1,7 @@
 import { Engine } from '../../lib/library'
 import { GameState, Direction } from './state'
 import { Left, Right, Up, Down, Wait } from './actions'
+import { Graphics } from './graphics'
 
 type AdvanceRsult = "collision" | "ate fruit" | "ok"; 
 
@@ -80,11 +81,11 @@ function printGameState(state: GameState) {
         let rowString = ""
         for (const cell of row) {
             if (cell === 0) {
-                rowString += "O"
+                rowString += cell + " "
             } else if (cell < 0) {
-                rowString += "F"
+                rowString += cell + " "
             } else if (cell > 0) {
-                rowString += "S"
+                rowString += cell + " "
             }
         }
         boardString += rowString + "\n"
@@ -111,8 +112,8 @@ function printGameState(state: GameState) {
     );
     let state: GameState = engine.getCurrentState();
     placeFruit(state.board);
+    const graphics = new Graphics(state.board.length);
     printGameState(state);
-
     let gameOver = false;
 
     advanceButton.addEventListener("click", () => {
@@ -133,5 +134,6 @@ function printGameState(state: GameState) {
         }
 
         printGameState(state)
+        graphics.drawBoard(state)
     })
 })();
