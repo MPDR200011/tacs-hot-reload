@@ -1,4 +1,4 @@
-import { Action, Result } from '../../lib/library'
+import { Action, Result } from '../lib/library'
 import { GameState, Direction } from './state'
 
 class Turn extends Action<GameState> {

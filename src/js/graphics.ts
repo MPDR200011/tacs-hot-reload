@@ -8,8 +8,7 @@ class Graphics {
     BoardSize: number;
     sizeRec: number;
 
-    constructor(size: number) {
-        let canvas: any = document.getElementById('snake');
+    constructor(size: number, canvas: any) {
         this.BoardSize = size;
         this.canvasSize = canvas.width;
         this.sizeRec = this.canvasSize / this.BoardSize;

@@ -1,7 +1,4 @@
-import { Engine } from '../../lib/library'
 import { GameState, Direction } from './state'
-import { Left, Right, Up, Down, Wait } from './actions'
-import { Graphics } from './graphics'
 
 type AdvanceRsult = "collision" | "ate fruit" | "ok"; 
 
@@ -93,47 +90,4 @@ function printGameState(state: GameState) {
     console.log(boardString)
 }
 
-(() => {
-    const advanceButton = document.getElementById("advance");
-    if (!advanceButton) return;
-
-    const engine = new Engine<GameState>(
-        createGameState([15,15], [7,7], 10),
-        [
-            new Wait(5),
-            new Left(),
-            new Up(),
-            new Right(),
-            new Wait(2),
-            new Down(),
-            new Left(),
-            new Wait(10)
-        ]
-    );
-    let state: GameState = engine.getCurrentState();
-    placeFruit(state.board);
-    const graphics = new Graphics(state.board.length);
-    printGameState(state);
-    let gameOver = false;
-
-    advanceButton.addEventListener("click", () => {
-        if (gameOver) return;
-
-        if (!engine.tick(state)) {
-            return;
-        }
-
-        state = engine.getCurrentState();
-
-        const result = advanceGameState(state);
-        if (result == "collision") {
-            console.log("YOU LOSE!!")
-            gameOver = true;
-        } else if (result == "ate fruit") {
-            placeFruit(state.board);
-        }
-
-        printGameState(state)
-        graphics.drawBoard(state)
-    })
-})();
+export { createGameState, printGameState,  placeFruit, advanceGameState };
