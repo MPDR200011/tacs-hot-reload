@@ -65,13 +65,50 @@ class Engine<T> {
         return cloneDeep(this.currentState);
     }
 
+    getCurrentActionId() {
+        return this.currentActionIdx;
+    }
+
     rollback(idx: number = 0) {
+        if (idx < 0) {
+            throw new Error("Negative Index")
+        }
         if (idx > this.actions.length) {
             throw new Error("Index out of ranger")
         }
 
         this.currentActionIdx = idx;
-        this.currentState = this.actions[this.currentActionIdx].resultingState();
+        if (this.currentActionIdx === 0) {
+            this.currentState = this.initialState;
+        } else {
+            this.currentState = this.actions[this.currentActionIdx - 1].resultingState();
+        }
+        
+    }
+
+    insertActionAt(idx: number, action: Action<T>) {
+        this.actions = [...this.actions.slice(0,idx), action, ...this.actions.slice(idx)]
+        if (idx < this.currentActionIdx) {
+            this.rollback(idx)
+        }
+    }
+
+    setActionAt(idx: number, action: Action<T>) {
+        this.actions[idx] = action;
+        if (idx < this.currentActionIdx) {
+            this.rollback(idx)
+        }
+    }
+
+    appendAction(action: Action<T>) {
+        this.actions.push(action);
+    }
+
+    removeActionAt(idx: number) {
+        this.actions = [...this.actions.slice(0,idx), ...this.actions.slice(idx + 1)];
+        if (idx < this.currentActionIdx) {
+            this.rollback(idx)
+        }
     }
 
     commit() {
