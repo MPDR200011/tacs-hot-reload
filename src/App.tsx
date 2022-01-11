@@ -2,25 +2,16 @@ import React, { useEffect, useState, useRef } from 'react';
 import './App.css';
 import { createGameState, placeFruit, advanceGameState } from './js/source'
 import { Engine } from './lib/library'
-import { Left, Right, Up, Down, Wait } from './js/actions'
 import { Graphics } from './js/graphics'
 import { GameState } from './js/state'
+import { DynamicActionList } from './DynamicActionList';
 
 
 
 function App() {
     const [engine] = useState(new Engine<GameState>(
-        createGameState([15,15], [7,7], 10),
-        [
-            new Wait(5),
-            new Left(),
-            new Up(),
-            new Right(),
-            new Wait(2),
-            new Down(),
-            new Left(),
-            new Wait(10)
-        ]
+        createGameState([15,15], [7,7], 10), 
+        []
     ))
     const [state, setState] = useState(engine.getCurrentState());
     const [gameOver, setGameOver] = useState(false);
@@ -38,7 +29,7 @@ function App() {
     }, []);
 
     return (
-        <div className="App">
+        <div className="App" style={{display:'flex', justifyContent: 'space-around', alignItems: 'flex-end'}} >
             <canvas id="snake" width="800" height="800" ref={canvasRef}></canvas>
             <button id="advance" onClick={() => {
                 if (gameOver) return;
@@ -62,6 +53,7 @@ function App() {
                     graphics.drawBoard(resultingState)
                 }
             }}>advance</button>
+            <DynamicActionList engine={engine}/>
         </div>
     );
 }
