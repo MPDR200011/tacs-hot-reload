@@ -1,16 +1,26 @@
-import { FormEventHandler, useState } from "react";
+import { Dispatch, FormEventHandler, useState } from "react";
 import { Down, Left, Right, Up, Wait } from "./js/actions";
+import { Graphics } from "./js/graphics";
 import { GameState } from "./js/state";
 import { Engine } from "./lib/library";
 
 export type DynamicActionListProps = {
-    engine: Engine<GameState>
+    engine: Engine<GameState>;
+    state: GameState;
+    setState: Dispatch<GameState>;
+    graphics: Graphics | undefined
 }
 
-export const DynamicActionList = ({ engine }: DynamicActionListProps) => {
+export const DynamicActionList = ({ engine, state, setState, graphics }: DynamicActionListProps) => {
 
     const [actions, setActions] = useState<string[]>([]);
     const [input, setInput] = useState('');
+
+    const updateGraphics = () => {
+        setState(engine.getCurrentState());
+        if (graphics) graphics.drawBoard(state);
+        console.log(engine.actions, engine.getCurrentActionId());
+    }
 
     const onUp = (index: number) => {
         // cant go up
@@ -26,6 +36,7 @@ export const DynamicActionList = ({ engine }: DynamicActionListProps) => {
         const action = engine.actions[index];
         engine.removeActionAt(index);
         engine.insertActionAt(index-1, action);
+        updateGraphics();
     }
 
     const onDown = (index: number) => {
@@ -42,6 +53,7 @@ export const DynamicActionList = ({ engine }: DynamicActionListProps) => {
         const action = engine.actions[index];
         engine.removeActionAt(index);
         engine.insertActionAt(index+1, action);
+        updateGraphics();
     }
 
     const onDelete = (index: number) => {
@@ -53,6 +65,7 @@ export const DynamicActionList = ({ engine }: DynamicActionListProps) => {
 
         // engine array
         engine.removeActionAt(index);
+        updateGraphics();
     }
 
     const actionValidator = (action:string) => {

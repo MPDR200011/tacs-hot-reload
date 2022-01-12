@@ -53,7 +53,7 @@ function App() {
                     graphics.drawBoard(resultingState)
                 }
             }}>advance</button>
-            <DynamicActionList engine={engine}/>
+            <DynamicActionList engine={engine} state={state} setState={setState} graphics={graphics}  />
         </div>
     );
 }
