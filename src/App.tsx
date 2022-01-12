@@ -6,13 +6,20 @@ import { Graphics } from './js/graphics'
 import { GameState } from './js/state'
 import { DynamicActionList } from './DynamicActionList';
 
-function App() {
-    const [engine] = useState(new Engine<GameState>(
-        createGameState([15,15], [7,7], 10), 
+function createGameStuff() {
+    const engine = new Engine<GameState>(
+        createGameState([15,15], [7,7], 1), 
         []
-    ))
-    const [state, setState] = useState(engine.getCurrentState());
-    const [gameOver, setGameOver] = useState(false);
+    );
+    const state = engine.getCurrentState();
+    
+    return {
+        engine, state, gameOver: false
+    }
+}
+
+function App() {
+    const [game] = useState(createGameStuff());
     const [graphics, setGraphics] = useState<Graphics>();
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -20,40 +27,52 @@ function App() {
     useEffect(() => {
         if (canvasRef.current) {
             console.log(canvasRef.current.width)
-            let graphics = new Graphics(state.board.length, canvasRef.current); 
+            let graphics = new Graphics(game.state.board.length, canvasRef.current); 
             setGraphics(graphics);
-            graphics.drawBoard(state);
+            graphics.drawBoard(game.state);
         }
     }, []);
 
-    useEffect(() => {
-        if (graphics) {
-            graphics.drawBoard(state)
+    function tickGame() {
+        if (game.gameOver) return false;
+
+        if (!game.engine.tick(game.state)) {
+            return false;
         }
-    }, [state]);
+
+        const resultingState = game.engine.getCurrentState();
+        game.state = resultingState;
+
+        const result = advanceGameState(resultingState);
+        if (result == "collision") {
+            console.log("YOU LOSE!!");
+            game.gameOver = true;
+        } else if (result == "ate fruit") {
+            placeFruit(resultingState.board);
+        }
+
+        if (graphics) {
+            graphics.drawBoard(resultingState)
+        }
+
+        return true;
+    }
 
     return (
         <div className="App" style={{display:'flex', justifyContent: 'space-around', alignItems: 'flex-end'}} >
             <canvas id="snake" width="800" height="800" ref={canvasRef}></canvas>
-            <button id="advance" onClick={() => {
-                if (gameOver) return;
-
-                if (!engine.tick(state)) {
-                    return;
-                }
-
-                const resultingState = engine.getCurrentState();
-                setState(resultingState);
-
-                const result = advanceGameState(resultingState);
-                if (result == "collision") {
-                    console.log("YOU LOSE!!")
-                    setGameOver(true);
-                } else if (result == "ate fruit") {
-                    placeFruit(resultingState.board);
-                }
-            }}>advance</button>
-            <DynamicActionList engine={engine} state={state} setState={setState} graphics={graphics}  />
+            <button id="advance" onClick={tickGame}>advance</button>
+            <button onClick={() => {
+                const intervalId = setInterval(() => {
+                    if (!tickGame()) {
+                        clearInterval(intervalId)
+                        return;
+                    }
+                }, 50)
+            }}>
+                play
+            </button>
+            <DynamicActionList engine={game.engine} state={game.state} setState={(state) => {game.state = state}} graphics={graphics}  />
         </div>
     );
 }
