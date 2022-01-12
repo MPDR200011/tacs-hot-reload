@@ -21,6 +21,8 @@ abstract class Action<T> {
         }
         return cloneDeep(this.state);
     }
+
+    reset() {}
 }
 
 class Engine<T> {
@@ -77,6 +79,19 @@ class Engine<T> {
             throw new Error("Index out of ranger")
         }
 
+        if (idx > this.currentActionIdx) {
+            throw new Error(
+                `Can't rollback to future, current: ${this.currentActionIdx}, destination: ${idx}`
+            );
+        }
+
+        this.currentActionIdx--;
+        for (; this.currentActionIdx > idx; this.currentActionIdx--) {
+            console.log(this.currentActionIdx)
+            this.actions[this.currentActionIdx].reset();
+        }
+        this.actions[this.currentActionIdx].reset();
+
         this.currentActionIdx = idx;
         if (this.currentActionIdx === 0) {
             this.currentState = this.initialState;
@@ -107,7 +122,13 @@ class Engine<T> {
     removeActionAt(idx: number) {
         this.actions = [...this.actions.slice(0,idx), ...this.actions.slice(idx + 1)];
         if (idx < this.currentActionIdx) {
-            this.rollback(idx)
+            this.currentActionIdx--;
+            if (idx >= this.actions.length) {
+                // in case we are removing the last element
+                this.rollback(this.actions.length-1)
+            } else {
+                this.rollback(idx)
+            }
         }
     }
 

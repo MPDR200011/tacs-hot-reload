@@ -69,6 +69,8 @@ function createGameState(
 
     state.board[startingPos[0]][startingPos[1]] = state.snakeLength;
 
+    placeFruit(state.board);
+
     return state;
 }
 

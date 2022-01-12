@@ -64,6 +64,10 @@ class Wait extends Action<GameState> {
 
         return Result.SUCCESS;
     }
+
+    reset() {
+        this.counter = 0;
+    }
 }
 
 
