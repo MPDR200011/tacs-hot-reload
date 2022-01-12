@@ -22,12 +22,11 @@ class Graphics {
         this.ctx.fillStyle = "rgb(0,200,0)";
         for (let i = 0; i < this.BoardSize; i++) {
             for (let k = 0; k < this.BoardSize; k++) {
-                if (state.board[k][i] > 1) {
+                if (state.board[k][i] > 0) {
                     this.ctx.fillStyle = "rgb(200,0,200)";
                     this.ctx.fillRect(i * this.sizeRec, k * this.sizeRec, this.sizeRec, this.sizeRec);
                 }
                 else if(state.board[k][i] < 0){
-                    console.log("fruti")
                     this.ctx.fillStyle = "rgb(200,0,0)";
                     this.ctx.fillRect(i * this.sizeRec, k * this.sizeRec, this.sizeRec, this.sizeRec);
                     this.ctx.fillStyle = "rgb(0,200,0)";
