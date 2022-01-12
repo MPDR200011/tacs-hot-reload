@@ -133,7 +133,7 @@ class Engine<T> {
     }
 
     commit(state?: T) {
-        this.currentState = state ? state : this.currentState;
+        this.currentState = state ? cloneDeep(state) : this.currentState;
         this.initialState = cloneDeep(this.currentState);
         this.actions = this.actions.splice(this.currentActionIdx);
         this.currentActionIdx = 0;
