@@ -1,3 +1,5 @@
+import { Engine } from '../lib/library';
+
 export type Left = [0, -1];
 export type Right = [0, 1];
 export type Up = [-1, 0];
@@ -9,4 +11,10 @@ export type GameState = {
     snakeHeadPos: [number, number];
     snakeLength: number;
     snakeDirection: Direction;
+}
+
+export type Game = {
+    engine: Engine<GameState>,
+    state: GameState,
+    gameOver: boolean
 }

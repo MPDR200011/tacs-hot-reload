@@ -3,10 +3,10 @@ import './App.css';
 import { createGameState, placeFruit, advanceGameState } from './js/source'
 import { Engine } from './lib/library'
 import { Graphics } from './js/graphics'
-import { GameState } from './js/state'
+import { Game, GameState } from './js/state'
 import { DynamicActionList } from './DynamicActionList';
 
-function createGameStuff() {
+function createGameStuff() : Game {
     const engine = new Engine<GameState>(
         createGameState([15,15], [7,7], 1), 
         []
@@ -72,7 +72,7 @@ function App() {
             }}>
                 play
             </button>
-            <DynamicActionList engine={game.engine} state={game.state} setState={(state) => {game.state = state}} graphics={graphics}  />
+            <DynamicActionList game={game} graphics={graphics}  />
         </div>
     );
 }

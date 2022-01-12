@@ -1,25 +1,22 @@
-import { Dispatch, FormEventHandler, useState } from "react";
+import { FormEventHandler, useState } from "react";
 import { Down, Left, Right, Up, Wait } from "./js/actions";
 import { Graphics } from "./js/graphics";
-import { GameState } from "./js/state";
-import { Engine } from "./lib/library";
+import { Game } from "./js/state";
 
 export type DynamicActionListProps = {
-    engine: Engine<GameState>;
-    state: GameState;
-    setState: Dispatch<GameState>;
+    game: Game,
     graphics: Graphics | undefined
 }
 
-export const DynamicActionList = ({ engine, state, setState, graphics }: DynamicActionListProps) => {
+export const DynamicActionList = ({ game, graphics }: DynamicActionListProps) => {
 
     const [actions, setActions] = useState<string[]>([]);
     const [input, setInput] = useState('');
 
     const updateGraphics = () => {
-        setState(engine.getCurrentState());
-        if (graphics) graphics.drawBoard(state);
-        console.log(engine.actions, engine.getCurrentActionId());
+        game.state = game.engine.getCurrentState();
+        if (graphics) graphics.drawBoard(game.state);
+        console.log(game.engine.actions, game.engine.getCurrentActionId());
     }
 
     const onUp = (index: number) => {
@@ -33,9 +30,9 @@ export const DynamicActionList = ({ engine, state, setState, graphics }: Dynamic
         setActions(arr);
 
         // engine array
-        const action = engine.actions[index];
-        engine.removeActionAt(index);
-        engine.insertActionAt(index-1, action);
+        const action = game.engine.actions[index];
+        game.engine.removeActionAt(index);
+        game.engine.insertActionAt(index-1, action);
         updateGraphics();
     }
 
@@ -50,9 +47,9 @@ export const DynamicActionList = ({ engine, state, setState, graphics }: Dynamic
         setActions(arr);
 
         // engine array
-        const action = engine.actions[index];
-        engine.removeActionAt(index);
-        engine.insertActionAt(index+1, action);
+        const action = game.engine.actions[index];
+        game.engine.removeActionAt(index);
+        game.engine.insertActionAt(index+1, action);
         updateGraphics();
     }
 
@@ -64,7 +61,14 @@ export const DynamicActionList = ({ engine, state, setState, graphics }: Dynamic
         setActions(arr);
 
         // engine array
-        engine.removeActionAt(index);
+        game.engine.removeActionAt(index);
+        updateGraphics();
+    }
+
+    const onCommit = () => {
+        const currentActionIdx = game.engine.getCurrentActionId();
+        game.engine.commit(game.state);
+        setActions(actions.splice(currentActionIdx));
         updateGraphics();
     }
 
@@ -78,19 +82,19 @@ export const DynamicActionList = ({ engine, state, setState, graphics }: Dynamic
         if (wait.test(action)) {
             const num = parseInt(wait.exec(action)![1]);
             setActions([...actions, 'wait ' + num]);
-            engine.appendAction(new Wait(num));
+            game.engine.appendAction(new Wait(num));
         } else if (left.test(action)) {
             setActions([...actions, 'left']);
-            engine.appendAction(new Left());
+            game.engine.appendAction(new Left());
         } else if (right.test(action)) {
             setActions([...actions, 'right']);
-            engine.appendAction(new Right());
+            game.engine.appendAction(new Right());
         } else if (down.test(action)) {
             setActions([...actions, 'down']);
-            engine.appendAction(new Down());
+            game.engine.appendAction(new Down());
         } else if (up.test(action)) {
             setActions([...actions, 'up']);
-            engine.appendAction(new Up());
+            game.engine.appendAction(new Up());
         }
     }
 
@@ -120,6 +124,9 @@ export const DynamicActionList = ({ engine, state, setState, graphics }: Dynamic
                 </label>
                 <input type="submit" value="Add" />
             </form>
+            <button onClick={onCommit}>
+                Commit
+            </button>
         </div>
     );
 }
