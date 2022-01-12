@@ -6,8 +6,6 @@ import { Graphics } from './js/graphics'
 import { GameState } from './js/state'
 import { DynamicActionList } from './DynamicActionList';
 
-
-
 function App() {
     const [engine] = useState(new Engine<GameState>(
         createGameState([15,15], [7,7], 10), 
@@ -20,13 +18,19 @@ function App() {
 
     // initialize game
     useEffect(() => {
-        placeFruit(state.board);
-
         if (canvasRef.current) {
             console.log(canvasRef.current.width)
-            setGraphics(new Graphics(state.board.length, canvasRef.current));
+            let graphics = new Graphics(state.board.length, canvasRef.current); 
+            setGraphics(graphics);
+            graphics.drawBoard(state);
         }
     }, []);
+
+    useEffect(() => {
+        if (graphics) {
+            graphics.drawBoard(state)
+        }
+    }, [state]);
 
     return (
         <div className="App" style={{display:'flex', justifyContent: 'space-around', alignItems: 'flex-end'}} >
@@ -47,10 +51,6 @@ function App() {
                     setGameOver(true);
                 } else if (result == "ate fruit") {
                     placeFruit(resultingState.board);
-                }
-
-                if (graphics) {
-                    graphics.drawBoard(resultingState)
                 }
             }}>advance</button>
             <DynamicActionList engine={engine} state={state} setState={setState} graphics={graphics}  />
