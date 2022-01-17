@@ -4,15 +4,17 @@ enum Result { SUCCESS, FAIL, RUN_AGAIN, INVALID_STATE };
 
 abstract class Action<T> {
 
+    private initialState?: T;
     public state?: T;
 
     constructor() { }
 
-    protected abstract __run() : Result;
+    protected abstract __run(state: T) : Result;
 
     run(state: T) : Result {
-        this.state = state;
-        return this.__run();
+        this.initialState = this.initialState ? this.initialState : cloneDeep(state);
+        this.state = cloneDeep(state);
+        return this.__run(this.state);
     }
 
     resultingState() {
@@ -22,7 +24,18 @@ abstract class Action<T> {
         return cloneDeep(this.state);
     }
 
-    reset() {}
+    getInitialState() {
+        if (!this.initialState) {
+            throw new Error("Initial State is null.")
+        }
+        return cloneDeep(this.initialState);
+    }
+
+    __reset() {}
+
+    reset() {
+        this.__reset();
+    }
 }
 
 class Engine<T> {
@@ -75,6 +88,16 @@ class Engine<T> {
         return this.actions.length;
     }
 
+    resetUntil(idx: number) {
+        this.currentActionIdx--;
+        for (; this.currentActionIdx > idx; this.currentActionIdx--) {
+            console.log(this.currentActionIdx)
+            this.actions[this.currentActionIdx].reset();
+        }
+        console.log(this.currentActionIdx)
+        this.actions[this.currentActionIdx].reset();
+    }
+
     rollback(idx: number = 0) {
         if (idx < 0) {
             throw new Error("Negative Index")
@@ -88,36 +111,44 @@ class Engine<T> {
                 `Can't rollback to future, current: ${this.currentActionIdx}, destination: ${idx}`
             );
         }
-
-        this.currentActionIdx--;
-        for (; this.currentActionIdx > idx; this.currentActionIdx--) {
-            console.log(this.currentActionIdx)
-            this.actions[this.currentActionIdx].reset();
-        }
-        this.actions[this.currentActionIdx].reset();
-
-        this.currentActionIdx = idx;
-        if (this.currentActionIdx === 0) {
-            console.log("resetting to initialState")
-            this.currentState = this.initialState;
-        } else {
-            this.currentState = this.actions[this.currentActionIdx - 1].resultingState();
+        
+        if (idx == this.currentActionIdx) {
+            // rolling back to present do nothing
+            return;
         }
         
+        if (this.actions.length === 0) {
+            this.currentActionIdx = 0;
+            this.currentState = this.initialState;
+            return;
+        }
+
+        this.resetUntil(idx);
+
+        this.currentActionIdx = idx;
+        this.currentState = this.actions[this.currentActionIdx].getInitialState();
     }
 
     insertActionAt(idx: number, action: Action<T>) {
         this.actions = [...this.actions.slice(0,idx), action, ...this.actions.slice(idx)]
         if (idx < this.currentActionIdx) {
-            this.rollback(idx)
+            this.currentActionIdx++;
+            const newState = this.actions[idx+1].getInitialState();
+            this.resetUntil(idx);
+            this.currentState = newState;
+            this.currentActionIdx = idx;
         }
     }
 
     setActionAt(idx: number, action: Action<T>) {
-        this.actions[idx] = action;
         if (idx < this.currentActionIdx) {
-            this.rollback(idx)
+            const newState = this.actions[idx].getInitialState();
+            this.currentActionIdx++;
+            this.resetUntil(idx);
+            this.currentState = newState;
+            this.currentActionIdx = idx;
         }
+        this.actions[idx] = action;
     }
 
     appendAction(action: Action<T>) {
@@ -125,25 +156,30 @@ class Engine<T> {
     }
 
     removeActionAt(idx: number) {
-        this.actions = [...this.actions.slice(0,idx), ...this.actions.slice(idx + 1)];
+        const newState = this.actions[idx].getInitialState();
         if (idx < this.currentActionIdx) {
             this.currentActionIdx--;
-            if (idx >= this.actions.length) {
-                // in case we are removing the last element
-                this.rollback(this.actions.length-1)
-            } else {
-                this.rollback(idx)
+            if (idx > 0) {
+                this.resetUntil(idx);
             }
+            this.currentState = newState;
+            this.currentActionIdx = idx;
         }
+
+        this.actions = [...this.actions.slice(0,idx), ...this.actions.slice(idx + 1)];
     }
 
     swapActions(idx1: number, idx2: number) {
-        [this.actions[idx1], this.actions[idx2]] = [this.actions[idx2], this.actions[idx1]]
-
         const minIdx = Math.min(idx1, idx2);
         if (minIdx < this.currentActionIdx) {
-            this.rollback(minIdx);
+            this.actions[idx1].reset();
+            this.actions[idx2].reset();
+            this.resetUntil(minIdx);
+            this.currentState = this.actions[minIdx].getInitialState();
+            this.currentActionIdx = minIdx;
         }
+
+        [this.actions[idx1], this.actions[idx2]] = [this.actions[idx2], this.actions[idx1]]
     }
 
     commit(state?: T) {

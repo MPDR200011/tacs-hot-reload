@@ -7,12 +7,8 @@ class Turn extends Action<GameState> {
         super();
     }
 
-    __run() {
-        if (!this.state) {
-            return Result.INVALID_STATE;
-        }
-
-        this.state.snakeDirection = this.direction;
+    __run(state: GameState) {
+        state.snakeDirection = this.direction;
 
         return Result.SUCCESS;
     }
@@ -50,13 +46,9 @@ class Wait extends Action<GameState> {
         this.counter = 0;
     }
 
-    __run() {
-        if (!this.state) {
-            return Result.INVALID_STATE;
-        }
+    __run(_: GameState) {
 
         this.counter++;
-
         if (this.counter < this.count) {
             return Result.RUN_AGAIN;
         }
@@ -65,7 +57,7 @@ class Wait extends Action<GameState> {
         return Result.SUCCESS;
     }
 
-    reset() {
+    __reset() {
         this.counter = 0;
     }
 }

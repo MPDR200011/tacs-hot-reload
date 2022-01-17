@@ -26,7 +26,6 @@ function App() {
     // initialize game
     useEffect(() => {
         if (canvasRef.current) {
-            console.log(canvasRef.current.width)
             let graphics = new Graphics(game.state.board.length, canvasRef.current); 
             setGraphics(graphics);
             graphics.drawBoard(game.state);
