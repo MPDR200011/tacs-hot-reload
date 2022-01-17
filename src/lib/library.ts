@@ -71,6 +71,10 @@ class Engine<T> {
         return this.currentActionIdx;
     }
 
+    getNumberOfActions() {
+        return this.actions.length;
+    }
+
     rollback(idx: number = 0) {
         if (idx < 0) {
             throw new Error("Negative Index")
@@ -94,6 +98,7 @@ class Engine<T> {
 
         this.currentActionIdx = idx;
         if (this.currentActionIdx === 0) {
+            console.log("resetting to initialState")
             this.currentState = this.initialState;
         } else {
             this.currentState = this.actions[this.currentActionIdx - 1].resultingState();
@@ -129,6 +134,15 @@ class Engine<T> {
             } else {
                 this.rollback(idx)
             }
+        }
+    }
+
+    swapActions(idx1: number, idx2: number) {
+        [this.actions[idx1], this.actions[idx2]] = [this.actions[idx2], this.actions[idx1]]
+
+        const minIdx = Math.min(idx1, idx2);
+        if (minIdx < this.currentActionIdx) {
+            this.rollback(minIdx);
         }
     }
 

@@ -30,9 +30,7 @@ export const DynamicActionList = ({ game, graphics }: DynamicActionListProps) =>
         setActions(arr);
 
         // engine array
-        const action = game.engine.actions[index];
-        game.engine.removeActionAt(index);
-        game.engine.insertActionAt(index-1, action);
+        game.engine.swapActions(index, index-1)
         updateGraphics();
     }
 
@@ -47,9 +45,7 @@ export const DynamicActionList = ({ game, graphics }: DynamicActionListProps) =>
         setActions(arr);
 
         // engine array
-        const action = game.engine.actions[index];
-        game.engine.removeActionAt(index);
-        game.engine.insertActionAt(index+1, action);
+        game.engine.swapActions(index, index+1)
         updateGraphics();
     }
 
